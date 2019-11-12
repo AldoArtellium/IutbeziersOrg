@@ -1,0 +1,73 @@
+version: '2'
+
+services:
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch-oss:6.2.3
+    networks:
+      - external
+      - elk
+    ports:
+      - 127.0.0.1:9200:9200
+    environment:
+      - cluster.name=elk-cluster
+    labels:
+      - "traefik.backend=elasticsearch"
+      - "traefik.docker.network=external"
+      - "traefik.frontend.rule=Host:elasticsearch.iutbeziers.org"
+      - "traefik.frontend.auth.basic.users=aldo:$$apr1$$k3uyces6$$NDdj62.rVPgDhkt.WK1g50, enzoalb:$$apr1$$zv2li5dt$$EvKIK2i3E.vo4DWL6nIkD1"
+      - "traefik.frontend.headers.STSSeconds=315360000"
+      - "traefik.frontend.headers.STSIncludeSubdomains=true"
+      - "traefik.frontend.headers.STSPreload=true"
+      - "traefik.enable=true"
+      - "traefik.port=9200"
+    volumes:
+      - ./elasticsearch/data:/usr/share/elasticsearch/data
+
+  kibana:
+    image: docker.elastic.co/kibana/kibana-oss:6.2.3
+    expose:
+      - 9200
+    networks:
+      - external
+      - elk
+    environment:
+      SERVER_NAME: kibana.iutbeziers.fr
+      ELASTICSEARCH_URL: http://elasticsearch:9200
+    labels:
+      - "traefik.backend=kibana"
+      - "traefik.docker.network=external"
+      - "traefik.frontend.rule=Host:kibana.iutbeziers.org"
+      - "traefik.frontend.auth.basic.users=aldo:$$apr1$$k3uyces6$$NDdj62.rVPgDhkt.WK1g50, enzoalb:$$apr1$$zv2li5dt$$EvKIK2i3E.vo4DWL6nIkD1"
+      - "traefik.frontend.headers.STSSeconds=315360000"
+      - "traefik.frontend.headers.STSIncludeSubdomains=true"
+      - "traefik.frontend.headers.STSPreload=true"
+      - "traefik.enable=true"
+      - "traefik.port=5601"
+
+  filebeat:
+    image: docker.elastic.co/beats/filebeat:6.2.3
+    privileged: true
+    user: root
+    networks:
+      - elk
+    volumes:
+      - ./filebeat/filebeat.yml:/usr/share/filebeat/filebeat.yml
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./filebeat/prospectors.d:/usr/share/filebeat/prospectors.d
+      - ./filebeat/modules.d:/usr/share/filebeat/modules.d
+      - /var/lib/docker/containers/:/var/lib/docker/containers/
+
+    command: -e -E 'output.elasticsearch.hosts=["127.0.0.1:9200"]'
+  
+  packetbeat:
+    image: docker.elastic.co/beats/packetbeat:6.2.3
+    container_name: packetbeat
+    cap_add: ['NET_RAW', 'NET_ADMIN']
+    network_mode: host
+
+    command: -e -E 'output.elasticsearch.hosts=["127.0.0.1:9200"]'
+
+networks:
+  elk:
+  external:
+    external: true

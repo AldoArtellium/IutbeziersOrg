@@ -1,0 +1,43 @@
+version: "2"
+services:
+  openvpn:
+    image: kylemanna/openvpn
+    volumes:
+      - "./data:/etc/openvpn"
+      - "/etc/localtime:/etc/localtime:ro"
+    ports:
+      - "1194:1194/udp"
+    expose:
+      - 5555
+    cap_add:
+      - NET_ADMIN
+
+  openvpn_monitor:
+    image: ruimarinho/openvpn-monitor
+    environment:
+      # General
+      OPENVPNMONITOR_DEFAULT_DATETIMEFORMAT: "%d/%m/%Y %H:%M:%S"
+      OPENVPNMONITOR_DEFAULT_LOGO: https://vpn.iutbeziers.org/logo.png
+      OPENVPNMONITOR_DEFAULT_MAPS: "True"
+      OPENVPNMONITOR_DEFAULT_LATITUDE: "0.0"
+      OPENVPNMONITOR_DEFAULT_LONGITUDE: "0.0"
+      OPENVPNMONITOR_DEFAULT_SITE: Live
+      # Site 1 - OpenVPN1
+      OPENVPNMONITOR_SITES_0_ALIAS: OVPN1
+      OPENVPNMONITOR_SITES_0_HOST: openvpn
+      OPENVPNMONITOR_SITES_0_NAME: VPNIUTBEZIERS
+      OPENVPNMONITOR_SITES_0_PORT: 5555
+    networks:
+      - default
+      - external
+    labels: 
+      - "traefik.enable=true"
+      - "traefik.frontend.rule=Host:vpn.iutbeziers.org"
+      - "traefik.port=80"
+      - "traefik.frontend.auth.basic.users=aldo:$$apr1$$k3uyces6$$NDdj62.rVPgDhkt.WK1g50, enzoalb:$$apr1$$zv2li5dt$$EvKIK2i3E.vo4DWL6nIkD1"
+#    ports:
+#      - "80:80"
+
+networks:
+  external:
+    external: true

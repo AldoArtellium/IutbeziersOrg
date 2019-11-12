@@ -1,0 +1,39 @@
+version: '2'
+
+services:
+  traefik:
+    image: traefik
+    restart: always
+    mem_limit:  128M
+    container_name: traefik
+    ports:
+      - 80:80
+      - 443:443
+    expose:
+      - 8080
+    networks:
+      - external
+    environment:
+      - "CF_API_EMAIL=ruffat.arnaud@gmail.com"
+      - "CF_API_KEY=[cloudflare_api_key_here]"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.frontend.rule=Host:traefik.iutbeziers.org"
+      - "traefik.port=8080"
+      - "traefik.frontend.auth.basic.users=aldo:$$apr1$$k3uyces6$$NDdj62.rVPgDhkt.WK1g50, enzoalb:$$apr1$$zv2li5dt$$EvKIK2i3E.vo4DWL6nIkD1"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./traefik/traefik.toml:/traefik.toml
+      - ./traefik/acme.json:/acme.json
+      - ./traefik/rules.toml:/rules.toml
+
+  traefik-dumpcerts:
+    volumes:
+      - './traefik/:/etc/traefik/acme'
+      - './traefik/ssl:/etc/traefik/ssl'
+    image: 'anh4n/traefik-dumpcerts:latest'
+    
+    
+networks:
+  external:
+    external: true

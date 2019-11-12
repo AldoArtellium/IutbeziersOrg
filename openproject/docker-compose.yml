@@ -1,0 +1,33 @@
+version: '2'
+
+services:
+  openproject:
+    image: openproject/community:8
+    restart: unless-stopped
+    volumes:
+      - ./pgdata:/var/openproject/pgdata
+      - ./assets:/var/openproject/assets
+    environment:
+      - SECRET_KEY_BASE=[pass_here]
+      ##############################################
+      #- EMAIL_DELIVERY_METHOD=smtp
+      #- SMTP_ADDRESS=smtp.sendgrid.net
+      #- SMTP_PORT=587
+      #- SMTP_DOMAIN="${SMTP_DOM}"
+      #- SMTP_AUTHENTICATION=login
+      #- SMTP_ENABLE_STARTTLS_AUTO=true
+      #- SMTP_USER_NAME="${SMTP_USER}"
+      #- SMTP_PASSWORD="${SMTP_PASS}"
+    labels:
+      - traefik.enable=true
+      - traefik.frontend.rule=Host:project.iutbeziers.org
+      - traefik.port=80
+    networks:
+      - external
+#    ports:
+#      - 80:80
+
+networks:
+  external:
+    external: true
+

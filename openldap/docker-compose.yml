@@ -1,0 +1,22 @@
+version: '3'
+
+services:
+  openldap:
+    image: osixia/openldap
+    ports:
+      - '389:389'
+      - '636:636'
+    environment:
+      - "LDAP_ORGANISATION=iutbeziersOrg"
+      - "LDAP_DOMAIN=iutbeziers.org"
+      - "LDAP_TLS=false"
+    volumes:
+      - './ldap/data:/var/lib/ldap'
+      - './ldap/conf:/etc/ldap/slapd.d'
+    networks:
+      auth_internal:
+        ipv4_address: 182.28.1.2
+
+networks:
+  auth_internal:
+    external: true

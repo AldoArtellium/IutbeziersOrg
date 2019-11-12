@@ -1,0 +1,60 @@
+version: '2'
+services:
+
+  roundcube:
+    image: roundcube/roundcubemail
+    environment:
+      - ROUNDCUBEMAIL_DEFAULT_HOST=tls://iutbeziers.org
+      - ROUNDCUBEMAIL_SMTP_SERVER=tls://iutbeziers.org
+    labels:
+      - "traefik.enable=true"
+      - "traefik.backend=rainloop"
+      - "traefik.frontend.rule=Host:mail.iutbeziers.org"
+      - "traefik.port=80"
+      - "traefik.docker.network=external"
+    networks:
+      - internal
+      - external
+    volumes:
+      - ./data/rainloop:/rainloop/data
+      
+  mail:
+    image: tvial/docker-mailserver:latest
+    hostname: mail
+    domainname: iutbeziers.org
+    container_name: mail
+    ports:
+      - "25:25"
+      - "143:143"
+      - "587:587"
+      - "993:993"
+    volumes:
+      - ./data/mail/data:/var/mail
+      - ./data/mail/state:/var/mail-state
+      - ./config/:/tmp/docker-mailserver/
+      - ../traefik/traefik/ssl/:/tmp/ssl:ro
+    environment:
+      - ENABLE_SPAMASSASSIN=1
+      - ENABLE_CLAMAV=1
+      - ENABLE_FAIL2BAN=1
+      - ENABLE_POSTGREY=1
+      - ONE_DIR=1
+      - DMS_DEBUG=0
+      - SSL_TYPE=manual
+      - SSL_CERT_PATH=/tmp/ssl/certs/*.iutbeziers.org.crt
+      - SSL_KEY_PATH=/tmp/ssl/private/*.iutbeziers.org.key
+    cap_add:
+      - NET_ADMIN
+      - SYS_PTRACE
+    networks:
+      internal:
+        ipv4_address: 147.28.1.2
+
+networks:
+  internal:
+    ipam:
+      driver: default
+      config:
+        - subnet: 147.28.1.0/24
+  external:
+    external: true

@@ -1,0 +1,23 @@
+version: "3.3"
+
+services:
+  restic:
+    container_name: restic
+    image: mazzolino/restic
+    hostname: docker
+    environment:
+        BACKUP_CRON: "0 0 2 * * *"
+        RESTIC_REPOSITORY: /srv/restic_docker
+        RESTIC_PASSWORD: [password_here]
+        RESTIC_BACKUP_SOURCES: /source
+        RESTIC_FORGET_ARGS: --keep-daily 7 --keep-weekly 4
+    volumes:
+        - /srv/restic_docker:/srv/restic_docker
+        - codimd_database:/source/codimd_database:ro
+        - gitlab_gitlab-data:/source/gitlab_gitlab-data:ro
+
+volumes:
+  codimd_database:
+    external: true
+  gitlab_gitlab-data:
+    external: true

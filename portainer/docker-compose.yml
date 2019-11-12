@@ -1,0 +1,18 @@
+version: '3'
+services:
+  portainer:
+    image: portainer/portainer
+    networks:
+      - external
+    labels:
+      - "traefik.enable=true"
+      - "traefik.frontend.rule=Host:portainer.iutbeziers.org"
+      - "traefik.port=9000"
+      - "traefik.backend=portainer"
+    volumes:
+        - "/var/run/docker.sock:/var/run/docker.sock"
+    restart: unless-stopped
+
+networks:
+  external:
+    external: true

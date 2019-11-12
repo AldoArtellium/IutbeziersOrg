@@ -1,0 +1,6 @@
+site_name: IUT Beziers Documentations
+
+nav:
+  - Home: index.md
+theme:
+  name: 'material'

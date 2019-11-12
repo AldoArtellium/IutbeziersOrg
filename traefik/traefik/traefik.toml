@@ -1,0 +1,54 @@
+checkNewVersion = true
+logLevel = "DEBUG"
+defaultEntryPoints = ["https","http","foo"]
+
+[entryPoints]
+  [entryPoints.http]
+  address = ":80"
+    [entryPoints.http.redirect]
+    entryPoint = "https"
+  [entryPoints.https]
+  address = ":443"
+    [entryPoints.https.tls]
+    minVersion = "VersionTLS12"
+    cipherSuites = [
+        "TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256",
+        "TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384",
+        "TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305"
+    ]
+  [entryPoints.foo]
+  address=":8080"
+    [entryPoints.foo.auth]
+      [entryPoints.foo.auth.basic]
+        users = [
+          'aldo:$apr1$k3uyces6$NDdj62.rVPgDhkt.WK1g50', 
+          'enzoalb:$apr1$zv2li5dt$EvKIK2i3E.vo4DWL6nIkD1'
+        ]
+[api]
+entrypoint="foo"
+dashboard = true
+
+[retry]
+
+[docker]
+endpoint = "unix:///var/run/docker.sock"
+domain = "iutbeziers.org"
+watch = true
+exposedbydefault = false
+
+[acme]
+email = "contact@iutbeziers.org"
+storage = "acme.json"
+entryPoint = "https"
+OnHostRule = true
+  [acme.dnsChallenge]
+  provider = "cloudflare"
+  delayBeforeCheck = 0
+  [[acme.domains]]
+  main = "*.iutbeziers.org"
+  sans = ["iutbeziers.org"]
+  
+[file]
+filename = "rules.toml"
+watch = true
+

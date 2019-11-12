@@ -1,0 +1,21 @@
+version: '3.3'
+services:
+  apaxy:
+    container_name: apaxy
+    volumes:
+      - './active-directory-data:/data'
+    ports:
+      - '84:80'
+    networks:
+      - external
+    labels:
+      - "traefik.enable=true"
+      - "traefik.backend=apaxy"
+      - "traefik.frontend.rule=Host:ad.iutbeziers.org"
+      - "traefik.port=80"
+      - "traefik.docker.network=external"
+    image: xetusoss/apaxy
+
+networks:
+  external:
+    external: true

@@ -1,0 +1,21 @@
+version: '3.3' 
+
+services: 
+  mkdocs-material: 
+    networks:
+      - external
+    labels:
+
+      - "traefik.enable=true"
+      - "traefik.frontend.rule=Host:doc.iutbeziers.org"
+      - "traefik.docker.network=external"
+      - "traefik.port=8000"
+    ports: 
+      - '8880:8000' 
+    volumes: 
+      - './docs:/docs' 
+    image: squidfunk/mkdocs-material
+
+networks:
+  external:
+    external: true
